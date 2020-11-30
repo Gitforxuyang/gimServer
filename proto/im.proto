@@ -1,0 +1,50 @@
+syntax = "proto3";
+package im;
+
+enum MessageAction {
+    Unknown = 0;
+    Text = 1; //文本
+    Image = 2; //图片
+    Sound = 3; //音频
+    Video = 4; //视频
+    Face = 5; //表情
+    Location = 6; //地理位置
+    File = 7; //文件
+    Gift = 8; //礼物
+    //    Notify = 9; //通知
+    Push = 10; //推送
+}
+//发送消息
+message SendMsgReq {
+    int64 seq = 1; //客户端发送id
+    //消息类型  1-单聊 2-群聊 3-聊天室
+    //群聊跟聊天室的区别  群聊可以加入多个，且不在线情况下仍可收到消息  聊天室只能加入一个，且如果不在线则收不到消息
+    int32 type = 2;
+    MessageAction action = 3;
+    int64 from = 4;
+    int64 to = 5;
+    string content = 6;
+}
+
+message SendMsgResp {
+    int64 seq = 1;
+    int64 msgId = 2;
+}
+message Nil {
+
+}
+message AuthReq {
+    string token = 1;
+    int64 uid = 2;
+    int64 uuid = 3;
+    string sdkVersion = 4; //sdk版本
+    string deviceId = 5; //设备id
+    string platform = 6; // 平台 android/iOS
+    string model = 7; //机型 iPhone4/Mi8
+    string system = 8; //系统版本  iOS10/android7.0
+}
+service Im {
+    rpc Ping (Nil) returns (Nil);
+    rpc SendMsg (SendMsgReq) returns (SendMsgResp);
+    rpc Auth (AuthReq) returns (Nil);
+}

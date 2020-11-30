@@ -1,0 +1,12 @@
+{
+  "redis": {
+    "addr": "192.168.3.3:6379",
+    "password": "",
+    "db": 0
+  },
+  "mongo": {
+    "url": "mongodb://192.168.3.3:27017/im",
+    "maxPoolSize": 10,
+    "minPoolSize": 5
+  }
+}
