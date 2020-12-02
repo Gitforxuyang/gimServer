@@ -13,6 +13,7 @@ type RedisConfig struct {
 }
 
 type RabbitConfig struct {
+	Addr     string
 }
 type MongoConfig struct {
 	Url         string

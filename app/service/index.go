@@ -4,6 +4,8 @@ import (
 	"context"
 	"gimServer/domain/entity"
 	"gimServer/domain/repo"
+	"gimServer/infra/rabbitmq"
+	"github.com/go-redis/redis/v7"
 )
 
 type IService interface {
@@ -12,10 +14,11 @@ type IService interface {
 }
 
 type service struct {
-	repo repo.IDomainRepo
-
+	repo  repo.IDomainRepo
+	mq    *rabbitmq.Queue
+	redis *redis.Client
 }
 
-func NewService(repo repo.IDomainRepo) IService {
-	return &service{repo: repo}
+func NewService(repo repo.IDomainRepo, mq *rabbitmq.Queue, redis *redis.Client) IService {
+	return &service{repo: repo, mq: mq, redis: redis}
 }

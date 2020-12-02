@@ -7,6 +7,7 @@ import (
 	"gimServer/domain/repo"
 	"gimServer/handler"
 	"gimServer/infra/mongo"
+	"gimServer/infra/rabbitmq"
 	"gimServer/infra/redis"
 	"gimServer/infra/wrapper"
 	"gimServer/proto"
@@ -30,10 +31,11 @@ func main() {
 	logrus.SetFormatter(&logrus.JSONFormatter{TimestampFormat: "2006-01-02 15:04:05.999"})
 	//资源初始化
 	config := conf.InitConfig()
-	redis.InitClient(config)
+	rc := redis.InitClient(config)
 	mongoClient := mongo.InitMongo(config)
+	mq := rabbitmq.InitClient(config)
 	repo := repo.NewDomainRepo(mongoClient)
-	svc := service.NewService(repo)
+	svc := service.NewService(repo, mq, rc)
 	im.RegisterImServer(grpcServer, handler.NewHandler(svc))
 	log.Printf("server run")
 	grpcServer.Serve(lis)

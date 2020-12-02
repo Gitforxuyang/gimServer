@@ -9,5 +9,8 @@
     "maxPoolSize": 10,
     "minPoolSize": 5
   },
+  "rabbit": {
+    "addr": "amqp://guest:guest@localhost:5672/"
+  },
   "logLevel": "debug"
 }
