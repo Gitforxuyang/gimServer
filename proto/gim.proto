@@ -1,0 +1,106 @@
+syntax = "proto3";
+package gim;
+//消息类型
+enum MessageAction {
+    Unknown = 0;
+    Text = 1; //文本
+    Image = 2; //图片
+    Sound = 3; //音频
+    Video = 4; //视频
+    Face = 5; //表情
+    Location = 6; //地理位置
+    File = 7; //文件
+    Gift = 8; //礼物
+//    Notify = 9; //通知
+    Push = 10; //推送
+}
+message Ping{
+
+}
+message Pong{
+
+}
+
+message AuthReq {
+    string token = 1;
+    int64 uid = 2;
+    string sdkVersion = 4; //sdk版本
+    string deviceId = 5; //设备id
+    string platform = 6; // 平台 android/iOS
+    string model = 7; //机型 iPhone4/Mi8
+    string system = 8; //系统版本  iOS10/android7.0
+}
+message AuthRes {
+    int32 code = 1;
+    string msg = 2;
+}
+//客户端发消息
+message SendMessageReq {
+    int64 seq = 1; //客户端发送id
+    //消息类型  1-单聊 2-群聊 3-聊天室
+    //群聊跟聊天室的区别  群聊可以加入多个，且不在线情况下仍可收到消息  聊天室只能加入一个，且如果不在线则收不到消息
+    int32 type = 2;
+    MessageAction action = 3;
+    int64 from = 4;
+    int64 to = 5;
+    string content = 6;
+}
+message SendMessageResp {
+    int32 code = 1; //如果code！=0 ，则是错误
+    string msg = 2;
+    int64 seq = 3;
+    int64 msgId = 4;
+}
+//通知客户端有新消息
+message Notify {
+    int64 msgId = 1;
+}
+message NotifyAck {
+    int64 msgId = 1;
+}
+
+message SyncMessageReq {
+    int64 lastId = 1;
+}
+
+message MessageBody {
+    int32 type = 1;
+    MessageAction action = 2;
+    int64 from = 3;
+    int64 to = 4;
+    string content = 5;
+}
+message SyncMessageResp {
+    int32 code = 1;
+    string msg = 2;
+    repeated MessageBody msgs = 3;
+}
+message FetchMessageReq {
+    int64 uid = 1; //对方的id
+    int64 msgId = 2; //获取到的最远的id
+}
+message FetchMessageResp {
+    int32 code = 1;
+    string msg = 2;
+    repeated MessageBody msgs = 3;
+}
+message SyncLastIdReq {
+    int64 lastId = 1;
+}
+message SyncLastIdResp {
+}
+message KickOutNotify {
+    int32 code = 1;
+    string msg = 2;
+}
+message LogoutReq {
+
+}
+message LogoutResp {
+
+}
+
+message BaseResp {
+    int32 code = 1;
+    string msg = 2;
+}

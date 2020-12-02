@@ -2,10 +2,11 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"gimServer/domain/entity"
 	"gimServer/infra/utils"
+	"gimServer/proto/gim"
+	"github.com/golang/protobuf/proto"
 	"strconv"
 )
 
@@ -41,11 +42,6 @@ func (m *service) SendMsg(ctx context.Context, _type, action int32, seq, from, t
 	}
 	//如果消息已存在，则直接返回
 	if msg.MsgId != 0 {
-		//TODO:为了测试发送通知
-		err = m._sendNotify(_type, CmdId_SendMessageResp, msg.MsgId, msg.To)
-		if err != nil {
-			return nil, err
-		}
 		return msg, nil
 	}
 	msg = &entity.Msg{}
@@ -65,8 +61,9 @@ func (m *service) SendMsg(ctx context.Context, _type, action int32, seq, from, t
 	if err != nil {
 		return nil, err
 	}
+	body := gim.Notify{MsgId: msg.MsgId}
 	//发送通知
-	err = m._sendNotify(_type, CmdId_SendMessageResp, msg.MsgId, msg.To)
+	err = m._sendNotify(_type, CmdId_SendMessageResp, msg.MsgId, msg.To, &body)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +107,7 @@ type QueueHeader struct {
 	UUID  int64 `json:"uuid"`  //如果指定连接id则不为0
 }
 
-func (m *service) _sendNotify(_type int32, cmdId uint8, msgId, uid int64) error {
+func (m *service) _sendNotify(_type int32, cmdId uint8, msgId, uid int64, body proto.Message) error {
 	routingKey := ""
 	//如果是单聊，则找到接收方的node消息
 	notify := QueueHeader{Type: _type, CmdId: cmdId, MsgId: msgId, To: uid}
@@ -126,7 +123,7 @@ func (m *service) _sendNotify(_type int32, cmdId uint8, msgId, uid int64) error 
 		routingKey = fmt.Sprintf("gim_node.%s", node)
 		notify.UUID = uuid
 	}
-	body, err := json.Marshal(&notify)
+	data, err := proto.Marshal(body)
 	if err != nil {
 		return err
 	}
@@ -134,7 +131,7 @@ func (m *service) _sendNotify(_type int32, cmdId uint8, msgId, uid int64) error 
 	if err != nil {
 		return err
 	}
-	return m.mq.Publish(routingKey, headers, body)
+	return m.mq.Publish(routingKey, headers, data)
 }
 
 func (m *service) _getUserNode(uid int64) (string, int64, error) {
